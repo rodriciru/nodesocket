@@ -1,6 +1,6 @@
 {
   "name": "nodesocket",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "OBS node socket browser",
   "dependencies": {
     "@rodrigogs/mysql-events": "^0.6.0",

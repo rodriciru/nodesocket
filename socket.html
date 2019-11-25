@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Node Socket</title>
+  <style>
+    * {
+      border-color: transparent;
+      background-color: transparent;
+    }
+
+    img {
+      position: fixed;
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      border-color: transparent;
+    }
+
+    body {
+      background-color: transparent;
+      margin: auto;
+      overflow: hidden;
+    }
+
+    #svgContainer {
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10000000;
+      background-color: bisque;
+    }
+  </style>
+  <script src="jquery-3.4.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+  <script src="settings.js"></script>
+  <script type="text/javascript">
+    var socket = io();
+    var intervals = [];
+    // duration in ms
+    let slideDuration = 2000;
+    let fadeDuration = slideDuration * 0.25;
+    let oldParsedMsg = {};
+
+    // modes:
+    // 0: Position order
+    // 1: Alphabetical order
+    // 2: Alphabetical order (start at random image)
+    // 3 (default): random order. Displays each image exactly once per loop.
+    let mode = 0;
+
+
+    //set init image
+    let tick = 0;
+    let images = null;
+    let indexes = new Array();
+    let topImage = null;
+    let botImage = null;
+    let slideshowStarted = false;
+    let interval = null;
+
+
+    function init() {
+      console.log("Body call to init");
+      try {
+        svg(1);
+        oldParsedMsg = {};
+        socket.on('connect', function(msg) {
+          console.log('init');
+          deleteAllIntervals(); // eliminamos todos los interval creados para no pisarnos
+          /*var i = setInterval(function() {
+            try {
+              socket.send('foo'); //el texto da igual ,lo importante es que mande
+            } catch (ex) {
+              console.error(ex);
+            }
+          }, 10000);
+          intervals.push(i);*/
+
+          var i = setInterval(function() {
+            console.clear();
+          }, 60000);
+          intervals.push(i);
+        });
+        socket.on('new settings', function(newSettings) {
+          console.log("Nuevo settings");
+          let parsedSettings = JSON.parse(newSettings);
+          slideDuration = parseInt(parsedSettings.slideDuration.valor);
+          mode = parseInt(parsedSettings.mode.valor);
+          fadeDuration = parseInt(parsedSettings.fadeDuration.valor);
+          if (Object.keys(oldParsedMsg).length > 0) { //para que slideDuration haga efecto hay que empezar de 0
+            deleteAllIntervals();
+            processImages(oldParsedMsg);
+          }
+        });
+        socket.on('new message', function(newMessage) {
+          let parsedMsg = JSON.parse(newMessage);
+          console.log("Nuevo Mensaje");
+          if (parsedMsg !== oldParsedMsg) {
+            console.log("El mensaje ha cambiado");
+            processImages(parsedMsg);
+          } else {
+            console.log("El mensaje es el mismo");
+          }
+          oldParsedMsg = Object.assign({}, parsedMsg);
+          //oldParsedMsg = parsedMsg;
+        });
+        socket.on('disconnect', function(msg) {
+          console.log("Disconnected - status " + this.readyState);
+        });
+        socket.on('error', function(msg) {
+          console.error("Error - status " + this.readyState);
+          svg(1);
+          //location.reload();
+          var i = setInterval(function() {
+            try {
+              console.log('reconect');
+              //reconnect();
+            } catch (ex) {
+              console.error(ex);
+            }
+          }, 10000);
+          intervals.push(i);
+        });
+      } catch (ex) {
+        console.error(ex);
+        //reconnect();
+      }
+    }
+
+    /*  function quit() {
+        if (socket != null) {
+          console.log('quit');
+          socket.close();
+          socket = null;
+          deleteAllIntervals(); // eliminamos todos los interval creados para no pisarnos
+        }
+      }
+
+      function reconnect() {
+        quit();
+        init();
+      }*/
+
+    function deleteAllIntervals() {
+      intervals.forEach(clearInterval); // eliminamos todos los interval creados para no pisarnos
+      intervals = [];
+    }
+
+    function svg(OnOff) {
+      var svg =
+        '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-eclipse"><path stroke="none" d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#43aff0"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 51;360 50 51" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></svg>';
+      if (OnOff) {
+        if (!$('#svgContainer').find('svg').hasClass('lds-eclipse')) {
+          $('#svgContainer').html(svg);
+        }
+        $('#svgContainer').fadeIn("2000", function() {
+          // Animation complete
+        });
+      } else {
+        $('#svgContainer').fadeOut("400", function() {
+          // Animation complete
+        });
+      }
+    }
+
+    function shuffle(a) {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      //console.log(a);
+      return a;
+    }
+
+    // [0, max)
+    function randomizeTick(max) {
+      tick = Math.floor(Math.random() * max);
+    }
+
+    function processImages(imagesJSON) {
+      tick = 0;
+      images = null;
+      indexes = new Array();
+      topImage = null;
+      botImage = null;
+      svg(0);
+      $('#imageContainer').empty();
+      clearInterval(interval);
+      // setup image src strings
+      images = Object.assign({}, imagesJSON); //images = imagesJSON no funciona por que como es un tipo complejo de JS lo guarda como referencia en vez de como valor
+      /*images.shift();
+      images.pop();*/
+
+      // Alphabetical order
+      if (mode === 1) {
+        images.sort(function(a, b) {
+          return (a['url'] > b['url']) ? 1 : ((a['url'] < b['url']) ? -1 : 0);
+        });
+      }
+
+      for (let i = Object.keys(images).length - 1; i >= 0; i--) {
+        // remove js, sh, or directory
+        let remove = images[i].url.includes(".js") || images[i].url.includes(".sh") || !images[i].url.includes(".");
+        if (remove) {
+          images.splice(i, 1);
+        }
+      }
+
+      // setup indexes for shuffling
+      for (let i = 0; i < Object.keys(images).length; i++) {
+        images[i] = "http://imagenes.nodesocket.local/" + images[i].url;
+        indexes.push(i);
+      }
+
+      // init img elements
+      topImage = document.createElement("img");
+      botImage = document.createElement("img");
+      let imageContainer = document.getElementById("imageContainer");
+      imageContainer.appendChild(topImage);
+      imageContainer.appendChild(botImage);
+      topImage.id = "topImage";
+      botImage.id = "botImage";
+
+      // prevent white outline by setting initial transparency
+      topImage.style.opacity = "0.0";
+      botImage.style.opacity = "0.0";
+
+      // 0: Position order
+
+      // randomize tick
+      if (mode === 2) {
+        randomizeTick(Object.keys(images).length);
+      }
+
+      // Random Order
+      if (mode === 3) {
+        shuffle(indexes);
+      }
+
+      if (Object.keys(images).length > 0) {
+        botImage.src = images[indexes[tick]];
+        botImage.style.opacity = "0.0";
+
+        //initial fade in
+        $("#botImage").animate({
+          opacity: 1.0
+        }, {
+          duration: fadeDuration
+        });
+
+        $("#topImage").animate({
+          opacity: 0
+        }, {
+          duration: fadeDuration
+        });
+
+        if (Object.keys(images).length > 1) {
+          slideshow();
+          interval = setInterval(slideshow, slideDuration);
+          intervals.push(interval);
+        }
+      }
+
+      /*
+      // Ver cada cuanto tiempo se cambia la imagen y comprobar que se ajusta a lo definido
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+        if (mutation.type == "attributes") {
+          console.timeEnd()
+          console.log("attributes changed")
+          console.time();
+        }
+        });
+      });
+
+      observer.observe(topImage, {
+        attributeFilter: ["src"],
+      });
+      */
+    }
+
+    function slideshow() {
+      //let fadeDuration = 1000;
+
+      $("#botImage").animate({
+        opacity: 1.0
+      }, {
+        duration: fadeDuration
+      });
+
+      $("#topImage").animate({ //properties
+        opacity: 0
+      }, { //options
+        duration: fadeDuration,
+        done: function() {
+          if (tick === Object.keys(images).length - 1) { //reset
+            if (mode === 3) {
+              shuffle(indexes);
+            } else if (mode === 2) {
+              randomizeTick(Object.keys(images).length);
+            }
+            tick = 0;
+          } else {
+            tick++;
+          }
+
+          topImage.src = botImage.src;
+          topImage.style.opacity = "1.0";
+          botImage.src = images[indexes[tick]];
+          botImage.style.opacity = "0.0";
+        }
+      });
+    }
+  </script>
+
+</head>
+
+<body onload="init()">
+  <div id="svgContainer"></div>
+  <div id="imageContainer"></div>
+</body>
+
+</html>
