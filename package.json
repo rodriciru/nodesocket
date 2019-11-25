@@ -1,7 +1,7 @@
 {
-  "name": "socket-chat-example",
+  "name": "nodesocket",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "OBS node socket browser",
   "dependencies": {
     "@rodrigogs/mysql-events": "^0.6.0",
     "express": "^4.17.1",
