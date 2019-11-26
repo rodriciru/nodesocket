@@ -37,14 +37,12 @@ export default {
   },
   mounted() {
   //  const that = this;
-    axios
-      .get('http://controller.manager.obssocket.local/managerHandler.php?getAllImages')
-      .then((response) => { this.images = response.data.msg; });
+    this.recargar();
   },
   methods: {
     recargar() {
       axios
-        .get('http://controller.manager.obssocket.local/managerHandler.php?getAllImages')
+        .get('http://controller.manager.nodesocket.local:3001/getAllImages')
         .then((response) => { this.images = response.data.msg; });
     },
   },

@@ -3,6 +3,7 @@
     <div
     v-for="image in images" :key="image.id"
     class="col-2 mb-4"
+    :id="'image'+image.id"
   >
     <b-card
    title="Card Title"
@@ -29,7 +30,7 @@
 export default {
   name: 'ImageCard',
   props: {
-    images: Object,
+    images: Array,
   },
 };
 </script>
