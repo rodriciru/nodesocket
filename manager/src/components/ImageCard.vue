@@ -6,31 +6,88 @@
     :id="'image'+image.id"
   >
     <b-card
-   title="Card Title"
-   :img-src="'  http://images.obssocket.local/' + image.url"
-   img-alt="Image"
+   :title="image.url"
+   :img-src="'http://imagenes.nodesocket.local/' + image.url"
+   :img-alt="image.url"
    img-top
    tag="article"
    style="max-width: 20rem;"
    class="h-100"
  >
-   <b-card-text>
-     Some quick example text to build on the card title and make up the bulk of the card's content.
-   </b-card-text>
-
-   <b-button href="#" variant="primary">Go somewhere</b-button>
+   <b-button-group>
+      <b-button variant="danger" @click="showDeleteModal(image.id,image.url)">
+        <font-awesome-icon icon="trash" />
+      </b-button>
+    </b-button-group>
  </b-card>
   </div>
-
-    <h1>{{ images }}</h1>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ImageCard',
   props: {
     images: Array,
+  },
+  methods: {
+    showDeleteModal(id, url) {
+      const h = this.$createElement;
+      // More complex structure
+      const messageVNode = h('div', { class: ['foobar'] }, [
+        h('b-alert', {
+          props: {
+            variant: 'danger',
+            show: true,
+          },
+          domProps: {
+            innerHTML: '<strong>Atención!</strong><p>Estas a punto de eliminar una imagen.<br/>Es una acción irreversible.</p>',
+          },
+        }),
+      ]);
+      this.$bvModal.msgBoxConfirm([messageVNode])
+        .then((value) => {
+          if (value) {
+            this.deleteImage(id, url);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    deleteImage(id, url) {
+      axios
+        .get(`http://controller.manager.nodesocket.local:3001/deleteImage/${id}/${url}`)
+        .then(() => {
+          this.$parent.recargar();
+        })
+        .catch((error) => {
+          if (error.response) {
+            /*
+            * The request was made and the server responded with a
+            * status code that falls out of the range of 2xx
+            */
+            this.error = error.response.statusText;
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            /*
+            * The request was made but no response was received, `error.request`
+            * is an instance of XMLHttpRequest in the browser and an instance
+            * of http.ClientRequest in Node.js
+            */
+            this.error = error.message;
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request and triggered an Error
+            this.error = error.message;
+          }
+          this.showErrorAlert = true;
+        });
+    },
   },
 };
 </script>

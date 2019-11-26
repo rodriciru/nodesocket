@@ -41,6 +41,15 @@ app.get('/getAllImages', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+app.get('/deleteImage/:id/:url', function(req, res) {
+  deleteImage(req.params.id, req.params.url)
+    .then(function(result) {
+      res.json(logResultado(1, result))
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+});
 
 http.listen(port, url, function() {
   console.log('manager Controller listening on ' + url + ':' + port);
@@ -107,6 +116,28 @@ getAllImages = function() {
   });
 }
 
+deleteImage = function(id,url) {
+  let sql = `DELETE FROM imagenes WHERE id = ${id}`;
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          fs.unlink(images_dir + '/' + url, function (err) {
+              if (err){
+                 reject(new Error(err));
+               }else{
+                resolve(results);
+              }
+          });
+        }
+      }
+    );
+  });
+}
+
 logResultado = function(status, msg, forceJSON = false) {
   let arr = {
     "ok": status,
@@ -118,11 +149,3 @@ logResultado = function(status, msg, forceJSON = false) {
     return arr;
   }
 };
-
-updateImagesDbFromDir()
-  .then(function(result) {
-    console.log(logResultado(1, '', true));
-  })
-  .catch(function(err) {
-    console.log(logResultado(0, 'no', true));
-  })
