@@ -68,6 +68,24 @@ app.get('/setActivo/:id/:activo', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+app.get('/getAllOpciones/', function(req, res) {
+  getAllOpciones()
+    .then(function(result) {
+      res.json(logResultado(1, result))
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+});
+app.get('/setOpcion/:id/:valor', function(req, res) {
+  setOpcion(req.params.id, parseInt(req.params.valor))
+    .then(function(result) {
+      res.json(logResultado(1, result))
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+});
 
 http.listen(port, url, function() {
   console.log('manager Controller listening on ' + url + ':' + port);
@@ -166,6 +184,38 @@ deleteImage = function(id,url) {
                 resolve(results);
               }
           });
+        }
+      }
+    );
+  });
+}
+
+getAllOpciones = function() {
+  let sql = `SELECT * FROM settings`;
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
+setOpcion = function(id,valor) {
+  let sql = `UPDATE settings SET valor = ${valor} WHERE id = ${id}; `;
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          resolve(results);
         }
       }
     );

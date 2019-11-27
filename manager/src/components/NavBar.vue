@@ -8,7 +8,8 @@
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav>
         <b-nav-item to="/">Gestionar</b-nav-item>
-        <b-nav-item to="/about">Añadir</b-nav-item>
+        <b-nav-item to="/anadir">Añadir</b-nav-item>
+        <b-nav-item to="/opciones">Opciones</b-nav-item>
       </b-navbar-nav>
 
       <!-- Right aligned nav items -->
