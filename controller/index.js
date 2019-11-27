@@ -50,6 +50,24 @@ app.get('/deleteImage/:id/:url', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+app.get('/setPosicion/:id/:posicion', function(req, res) {
+  setPosicion(req.params.id, req.params.posicion)
+    .then(function(result) {
+      res.json(logResultado(1, result))
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+});
+app.get('/setActivo/:id/:activo', function(req, res) {
+  setActivo(req.params.id, parseInt(req.params.activo))
+    .then(function(result) {
+      res.json(logResultado(1, result))
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+});
 
 http.listen(port, url, function() {
   console.log('manager Controller listening on ' + url + ':' + port);
@@ -116,6 +134,22 @@ getAllImages = function() {
   });
 }
 
+setActivo = function(id,activo) {
+  let sql = `UPDATE imagenes SET activo = ${(activo && (Number.isInteger(activo) || typeof activo === "boolean") ? 1 : 0)} WHERE imagenes.id = ${id};`;
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
 deleteImage = function(id,url) {
   let sql = `DELETE FROM imagenes WHERE id = ${id}`;
   return new Promise(function(resolve, reject) {
@@ -132,6 +166,55 @@ deleteImage = function(id,url) {
                 resolve(results);
               }
           });
+        }
+      }
+    );
+  });
+}
+
+setPosicion = function(id,posicion) {
+  let sql = `UPDATE imagenes SET posicion = ${posicion} WHERE imagenes.id = ${id}; `;
+
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          sql = `SELECT id,posicion FROM imagenes AS img WHERE img.id != ${id} ORDER BY posicion;`;
+          db.query(
+            sql,
+            function(error, results, fields) {
+              if (results === undefined) {
+                reject(new Error(error));
+              } else {
+                sql = `UPDATE imagenes SET posicion = (CASE`;
+                let newPos = 0;
+                for (var i = 0; i < results.length; i++) {
+                  if(newPos == posicion) newPos++;
+                  sql += ` WHEN id = ${results[i]["id"]} THEN ${newPos}`;
+                  newPos++;
+                }
+                sql += " END) WHERE  id IN (";
+                for (var i = 0; i < results.length; i++) {
+        					sql += results[i]["id"] + ",";
+        				}
+                sql = sql.substring(0, sql.length - 1);
+        				sql += ");";
+                db.query(
+                  sql,
+                  function(error, results, fields) {
+                    if (results === undefined) {
+                      reject(new Error(error));
+                    } else {
+                      resolve(results);
+                    }
+                  }
+                );
+              }
+            }
+          );
         }
       }
     );

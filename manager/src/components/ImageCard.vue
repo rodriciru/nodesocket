@@ -1,9 +1,9 @@
 <template>
-  <div class="row">
+    <draggable class="row" v-model="images" @start="dragStart" @end="dragEnd">
     <div
     v-for="image in images" :key="image.id"
     class="col-2 mb-4"
-    :id="'image'+image.id"
+    :data-id="image.id"
   >
     <b-card
    :title="image.url"
@@ -14,6 +14,16 @@
    style="max-width: 20rem;"
    class="h-100"
  >
+  <b-form-checkbox
+  switch
+  size="lg"
+  :checked="!!+image.activo"
+  @input="setActivo($event,image.id)
+  ">
+      <font-awesome-icon icon="eye" v-if="!!+image.activo"/>
+      <font-awesome-icon icon="eye-slash" v-else />
+
+  </b-form-checkbox>
    <b-button-group>
       <b-button variant="danger" @click="showDeleteModal(image.id,image.url)">
         <font-awesome-icon icon="trash" />
@@ -21,18 +31,87 @@
     </b-button-group>
  </b-card>
   </div>
-  </div>
+
+</draggable>
 </template>
 
 <script>
 import axios from 'axios';
+import draggable from 'vuedraggable';
 
 export default {
   name: 'ImageCard',
   props: {
     images: Array,
   },
+  components: {
+    draggable,
+  },
   methods: {
+    setActivo(e, id) {
+      const activo = e ? 1 : 0;
+      axios
+        .get(`http://controller.manager.nodesocket.local:3001/setActivo/${id}/${activo}`)
+        .then(() => {
+          this.$parent.recargar();
+        })
+        .catch((error) => {
+          if (error.response) {
+            /*
+            * The request was made and the server responded with a
+            * status code that falls out of the range of 2xx
+            */
+            this.error = error.response.statusText;
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            /*
+            * The request was made but no response was received, `error.request`
+            * is an instance of XMLHttpRequest in the browser and an instance
+            * of http.ClientRequest in Node.js
+            */
+            this.error = error.message;
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request and triggered an Error
+            this.error = error.message;
+          }
+          this.showErrorAlert = true;
+        });
+    },
+    dragEnd(e) {
+      const { id } = e.item.dataset;
+      axios
+        .get(`http://controller.manager.nodesocket.local:3001/setPosicion/${id}/${e.newIndex}`)
+        .then(() => {
+          this.$parent.recargar();
+        })
+        .catch((error) => {
+          if (error.response) {
+            /*
+            * The request was made and the server responded with a
+            * status code that falls out of the range of 2xx
+            */
+            this.error = error.response.statusText;
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            /*
+            * The request was made but no response was received, `error.request`
+            * is an instance of XMLHttpRequest in the browser and an instance
+            * of http.ClientRequest in Node.js
+            */
+            this.error = error.message;
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request and triggered an Error
+            this.error = error.message;
+          }
+          this.showErrorAlert = true;
+        });
+    },
     showDeleteModal(id, url) {
       const h = this.$createElement;
       // More complex structure
