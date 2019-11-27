@@ -105,6 +105,16 @@ app.get('/setActivo/:id/:activo', function(req, res) {
     })
 });
 
+app.get('/getOpcion/:nombre', function(req, res) {
+  getOpcion(req.params.nombre)
+    .then(function(result) {
+      res.json(logResultado(1, result))
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+});
+
 app.get('/getAllOpciones/', function(req, res) {
   getAllOpciones()
     .then(function(result) {
@@ -169,15 +179,14 @@ app.post('/addImagen', async function(req, res) {
     }
     addImagenToDB(req.file.originalname)
       .then(function(result) {
-        res.json(logResultado(1, result))
+        // Display uploaded image for user validation
+        return res.status(200).json(logResultado(1, result));
       })
       .catch(function(err) {
         console.log(logResultado(0, err));
-      })
-    // Display uploaded image for user validation
-    return res.status(200).send(req.file);
+      });
   });
-
+});
 
 http.listen(port, url, function() {
   console.log('manager Controller listening on ' + url + ':' + port);

@@ -1,5 +1,13 @@
 <template>
-  <div>
+  <div class="row">
+    <div class="col-sm-4">
+<h2>Instrucciones</h2>
+<p>
+  Arrastra una imagen o pincha en el cuadro, para añadir una imagen.<br/>
+  Hay un limite de tamaño de {{maxFileSize}}MB.<br/>
+  La imagen se creará como visible por defecto.
+</p>
+    </div>
     <vue-dropzone
 ref="myVueDropzone"
 :useCustomSlot="true"
@@ -9,6 +17,7 @@ id="dropzone"
 @vdropzone-file-added="fileAdded"
 @vdropzone-sending-multiple="sendingFiles"
 @vdropzone-success-multiple="success"
+class="col-sm-8"
 ></vue-dropzone>
   </div>
 </template>
@@ -16,6 +25,8 @@ id="dropzone"
 <script>
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
+import axios from 'axios';
+
 
 export default {
   name: 'anadir',
@@ -24,11 +35,15 @@ export default {
   },
   data() {
     return {
+      maxFileSize: {
+        type: String,
+        default: '1',
+      },
       ok: true,
       dropzoneOptions: {
         url: 'http://controller.manager.nodesocket.local:3001/addImagen',
         thumbnailWidth: 150,
-        maxFilesize: 5,
+        maxFilesize: this.maxFileSize,
         headers: { 'My-Awesome-Header': 'header value' },
         addRemoveLinks: true,
       },
@@ -54,12 +69,37 @@ export default {
       dDuplicate: false,
     };
   },
-  mounted() {
-  //  const that = this;
-    this.recargar();
+  beforeMount() {
+    this.getOpcion('maxFileSize');
   },
   methods: {
-    recargar() {
+    getOpcion(nombre) {
+      axios
+        .get(`http://controller.manager.nodesocket.local:3001/getOpcion/${nombre}`)
+        .then((response) => {
+          console.log(response);
+          this.maxFileSize = response.data.msg[0].valor;
+        })
+        .catch((error) => {
+          if (error.response) {
+            /*
+            * The request was made and the server responded with a
+            * status code that falls out of the range of 2xx
+            */
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            /*
+            * The request was made but no response was received, `error.request`
+            * is an instance of XMLHttpRequest in the browser and an instance
+            * of http.ClientRequest in Node.js
+            */
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request and triggered an Error
+          }
+        });
     },
   },
 };
