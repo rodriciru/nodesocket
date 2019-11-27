@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var cors = require('cors')
 var path = require('path');
+var multer = require('multer');
 var http = require('http').Server(app);
 var port = process.env.PORT || 3001;
 var url = process.env.URL || "controller.manager.nodesocket.local";
@@ -14,15 +15,46 @@ var db = mysql.createConnection({
   database: 'obssocket'
 });
 const images_dir = "../imagenes";
+let maxFileSize = 3 * 1000000;
+
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, images_dir);
+  },
+
+  // By default, multer removes file extensions so let's add them back
+  filename: function(req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+const imageFilter = function(req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = 'Solo imagenes!';
+    return cb(new Error('Solo imagenes!'), false); // si envias un error la ejecución se para de golpe. Si envías null simplemente salta ese file.
+  }
+
+  fs.access(images_dir + '/' + file.originalname, fs.F_OK, (err) => {
+    if (err) {} else {
+      //file exists
+      req.fileValidationError = 'Ya existe una imagen con ese nombre!';
+      return cb(null, false);
+    }
+  });
+  cb(null, true);
+};
+
 
 db.connect();
 //db.end();
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
+
 app.get('/updateImagesDbFromDir', function(req, res) {
   updateImagesDbFromDir()
     .then(function(result) {
@@ -32,6 +64,7 @@ app.get('/updateImagesDbFromDir', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+
 app.get('/getAllImages', function(req, res) {
   getAllImages()
     .then(function(result) {
@@ -41,6 +74,7 @@ app.get('/getAllImages', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+
 app.get('/deleteImage/:id/:url', function(req, res) {
   deleteImage(req.params.id, req.params.url)
     .then(function(result) {
@@ -50,6 +84,7 @@ app.get('/deleteImage/:id/:url', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+
 app.get('/setPosicion/:id/:posicion', function(req, res) {
   setPosicion(req.params.id, req.params.posicion)
     .then(function(result) {
@@ -59,6 +94,7 @@ app.get('/setPosicion/:id/:posicion', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+
 app.get('/setActivo/:id/:activo', function(req, res) {
   setActivo(req.params.id, parseInt(req.params.activo))
     .then(function(result) {
@@ -68,6 +104,7 @@ app.get('/setActivo/:id/:activo', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+
 app.get('/getAllOpciones/', function(req, res) {
   getAllOpciones()
     .then(function(result) {
@@ -77,6 +114,7 @@ app.get('/getAllOpciones/', function(req, res) {
       console.log(logResultado(0, err));
     })
 });
+
 app.get('/setOpcion/:id/:valor', function(req, res) {
   setOpcion(req.params.id, parseInt(req.params.valor))
     .then(function(result) {
@@ -87,16 +125,64 @@ app.get('/setOpcion/:id/:valor', function(req, res) {
     })
 });
 
+app.post('/addImagen', async function(req, res) {
+  await getOpcion('maxFileSize')
+    .then(function(result) {
+      maxFileSize = result[0].valor * 1000000;
+    })
+    .catch(function(err) {
+      console.log(logResultado(0, err));
+    })
+  var limits = {
+    fileSize: maxFileSize
+  }
+  let upload = multer({
+    storage: storage,
+    fileFilter: imageFilter,
+    limits: limits
+  }).single('file');
+
+  upload(req, res, function(err) {
+    // req.file contains information of uploaded file
+    // req.body contains information of text fields, if there were any
+    if (req.fileValidationError) {
+      return res.status(422).json({
+        error: req.fileValidationError
+      });
+    } else if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(422).json({
+          error: `La imagen es muy grande el maximo es ${maxFileSize / 1000000}MB`
+        });
+      }
+      return res.status(422).json({
+        error: err
+      });
+    } else if (!req.file) {
+      return res.status(422).json({
+        error: 'Please select an image to upload'
+      });
+    } else if (err) {
+      return res.status(422).json({
+        error: err
+      });
+    }
+    addImagenToDB(req.file.originalname)
+      .then(function(result) {
+        res.json(logResultado(1, result))
+      })
+      .catch(function(err) {
+        console.log(logResultado(0, err));
+      })
+    // Display uploaded image for user validation
+    return res.status(200).send(req.file);
+  });
+
+
 http.listen(port, url, function() {
   console.log('manager Controller listening on ' + url + ':' + port);
 });
 
-/*function getAllImages(callback){
-  db.query('SELECT * from imagenes', function (error, results, fields) {
-    if (error) throw error;
-    return callback(JSON.stringify(results));
-  });
-}*/
 updateImagesDbFromDir = function() {
   return new Promise(function(resolve, reject) {
     let sql = "INSERT IGNORE INTO `imagenes` VALUES";
@@ -152,7 +238,23 @@ getAllImages = function() {
   });
 }
 
-setActivo = function(id,activo) {
+addImagenToDB = function(url) {
+  let sql = `INSERT IGNORE INTO imagenes VALUES (null,'${url}',1,0);`;
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
+setActivo = function(id, activo) {
   let sql = `UPDATE imagenes SET activo = ${(activo && (Number.isInteger(activo) || typeof activo === "boolean") ? 1 : 0)} WHERE imagenes.id = ${id};`;
   return new Promise(function(resolve, reject) {
     db.query(
@@ -168,7 +270,7 @@ setActivo = function(id,activo) {
   });
 }
 
-deleteImage = function(id,url) {
+deleteImage = function(id, url) {
   let sql = `DELETE FROM imagenes WHERE id = ${id}`;
   return new Promise(function(resolve, reject) {
     db.query(
@@ -177,12 +279,12 @@ deleteImage = function(id,url) {
         if (results === undefined) {
           reject(new Error(error));
         } else {
-          fs.unlink(images_dir + '/' + url, function (err) {
-              if (err){
-                 reject(new Error(err));
-               }else{
-                resolve(results);
-              }
+          fs.unlink(images_dir + '/' + url, function(err) {
+            if (err) {
+              reject(new Error(err));
+            } else {
+              resolve(results);
+            }
           });
         }
       }
@@ -206,7 +308,23 @@ getAllOpciones = function() {
   });
 }
 
-setOpcion = function(id,valor) {
+getOpcion = function(nombre) {
+  let sql = `SELECT * FROM settings WHERE nombre = '${nombre}'`;
+  return new Promise(function(resolve, reject) {
+    db.query(
+      sql,
+      function(error, results, fields) {
+        if (results === undefined) {
+          reject(new Error(error));
+        } else {
+          resolve(results);
+        }
+      }
+    );
+  });
+}
+
+setOpcion = function(id, valor) {
   let sql = `UPDATE settings SET valor = ${valor} WHERE id = ${id}; `;
   return new Promise(function(resolve, reject) {
     db.query(
@@ -222,7 +340,7 @@ setOpcion = function(id,valor) {
   });
 }
 
-setPosicion = function(id,posicion) {
+setPosicion = function(id, posicion) {
   let sql = `UPDATE imagenes SET posicion = ${posicion} WHERE imagenes.id = ${id}; `;
 
   return new Promise(function(resolve, reject) {
@@ -242,16 +360,16 @@ setPosicion = function(id,posicion) {
                 sql = `UPDATE imagenes SET posicion = (CASE`;
                 let newPos = 0;
                 for (var i = 0; i < results.length; i++) {
-                  if(newPos == posicion) newPos++;
+                  if (newPos == posicion) newPos++;
                   sql += ` WHEN id = ${results[i]["id"]} THEN ${newPos}`;
                   newPos++;
                 }
                 sql += " END) WHERE  id IN (";
                 for (var i = 0; i < results.length; i++) {
-        					sql += results[i]["id"] + ",";
-        				}
+                  sql += results[i]["id"] + ",";
+                }
                 sql = sql.substring(0, sql.length - 1);
-        				sql += ");";
+                sql += ");";
                 db.query(
                   sql,
                   function(error, results, fields) {

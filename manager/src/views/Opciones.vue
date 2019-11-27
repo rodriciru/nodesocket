@@ -23,7 +23,7 @@
 import axios from 'axios';
 
 export default {
-  name: 'home',
+  name: 'opciones',
   props: {
     showSpinner: {
       type: Boolean,
