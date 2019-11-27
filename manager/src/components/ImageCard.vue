@@ -175,6 +175,20 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.card-img-top{
+  height: 200px;
+  object-fit: cover;
+  object-position: top;
+  border-radius:5px;
+  box-shadow:0 0 10px rgba(0,0,0,0.63);
+  transition: height 0.5s;
+  &:hover{
+    height: initial;
+  }
+}
+.card{
+  box-shadow: 3px 3px 11px rgba(0,0,0,0.63);
+}
 h3 {
   margin: 40px 0 0;
 }

@@ -1,5 +1,5 @@
 {
-  "name": "nodesocket",
+  "name": "nodesocket-socket",
   "version": "1.0.0",
   "description": "OBS node socket browser",
   "dependencies": {
