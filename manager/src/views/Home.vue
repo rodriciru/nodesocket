@@ -37,26 +37,17 @@ import ImageCard from '@/components/ImageCard.vue';
 
 export default {
   name: 'home',
-  props: {
-    test: {
-      type: String,
-      default: 'Homeview',
-    },
-    error: {
-      type: String,
-    },
-    showErrorAlert: {
-      type: Boolean,
-      default: false,
-    },
-    showSpinner: {
-      type: Boolean,
-      default: true,
-    },
-  },
   data() {
     return {
       images: null,
+      showSpinner: {
+        type: Boolean,
+        default: true,
+      },
+      error: {
+        type: String,
+      },
+      showErrorAlert: false,
     };
   },
   components: {

@@ -12,11 +12,7 @@
 ref="myVueDropzone"
 :useCustomSlot="true"
 id="dropzone"
-@vdropzone-upload-progress="uploadProgress"
 :options="dropzoneOptions"
-@vdropzone-file-added="fileAdded"
-@vdropzone-sending-multiple="sendingFiles"
-@vdropzone-success-multiple="success"
 class="col-sm-8"
 ></vue-dropzone>
   </div>
@@ -77,7 +73,6 @@ export default {
       axios
         .get(`http://controller.manager.nodesocket.local:3001/getOpcion/${nombre}`)
         .then((response) => {
-          console.log(response);
           this.maxFileSize = response.data.msg[0].valor;
         })
         .catch((error) => {

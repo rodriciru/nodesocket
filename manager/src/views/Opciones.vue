@@ -24,14 +24,12 @@ import axios from 'axios';
 
 export default {
   name: 'opciones',
-  props: {
-    showSpinner: {
-      type: Boolean,
-      default: true,
-    },
-  },
   data() {
     return {
+      showSpinner: {
+        type: Boolean,
+        default: true,
+      },
       items: null,
       /* items: [
         { age: 40, first_name: 'Dickerson', last_name: 'Macdonald' },
@@ -53,7 +51,6 @@ export default {
         .then((response) => {
           this.showSpinner = false;
           this.items = response.data.msg;
-          console.log(this.items);
         })
         .catch((error) => {
           this.showSpinner = false;

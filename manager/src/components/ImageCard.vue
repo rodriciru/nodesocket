@@ -1,5 +1,5 @@
 <template>
-    <draggable class="row" v-model="images" @start="dragStart" @end="dragEnd">
+    <draggable class="row" v-model="images" @end="dragEnd">
     <div
     v-for="image in images" :key="image.id"
     class="col-2 mb-4"
@@ -44,6 +44,11 @@ export default {
   props: {
     images: Array,
   },
+  data() {
+    return {
+      imagesComputed: this.images,
+    };
+  },
   components: {
     draggable,
   },
@@ -77,7 +82,6 @@ export default {
             // Something happened in setting up the request and triggered an Error
             this.error = error.message;
           }
-          this.showErrorAlert = true;
         });
     },
     dragEnd(e) {
@@ -109,7 +113,6 @@ export default {
             // Something happened in setting up the request and triggered an Error
             this.error = error.message;
           }
-          this.showErrorAlert = true;
         });
     },
     showDeleteModal(id, url) {
@@ -164,7 +167,6 @@ export default {
             // Something happened in setting up the request and triggered an Error
             this.error = error.message;
           }
-          this.showErrorAlert = true;
         });
     },
   },
