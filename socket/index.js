@@ -123,7 +123,7 @@ http.listen(port, url, function() {
 getAllImages = function(){
   return new Promise(function(resolve, reject){
     db.query(
-        "SELECT * from imagenes ORDER BY posicion",
+        "SELECT * from imagenes WHERE activo = 1 ORDER BY posicion",
         function(error, results, fields){
             if(results === undefined){
                 reject(new Error("Error rows is undefined"));
