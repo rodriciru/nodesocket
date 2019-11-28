@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
 
 INSERT INTO `settings` (`id`, `nombre`, `valor`, `descripcion`) VALUES
 (1, 'maxFileSize', '5', 'Tamaño maximo del fichero a subir en MB'),
-(2, 'slideDuration', '2000', 'Duracion de cada imagen en ms'),
+(2, 'slideDuration', '10000', 'Duracion de cada imagen en ms'),
 (3, 'fadeDuration', '500', 'Duracion del efecto desaparecer en ms'),
 (4, 'mode', '0', '0: Orden por posición (defecto)\r\n1: Orden Alfabetico\r\n2: Orden Alfabetico (Empieza en una imagen aleatoria)\r\n3: Aleatorio. Una imagen por vuelta.');
 COMMIT;
