@@ -27,3 +27,9 @@ export default {
   name: 'NavBar',
 };
 </script>
+
+<style scoped lang="scss">
+.navbar {
+  background-color: #0f0f0f !important;
+}
+</style>

@@ -7,7 +7,7 @@
           type="grow"
           label="Loading..."></b-spinner>
     </div>
-    <b-table striped hover :items="items" primary-key="id">
+    <b-table hover :items="items" primary-key="id" dark >
       <template v-slot:cell(valor)="row">
         <b-form-input
         v-model="row.item.valor"

@@ -188,6 +188,10 @@ export default {
 }
 .card{
   box-shadow: 3px 3px 11px rgba(0,0,0,0.63);
+  background-color: #7b7b7b;
+}
+.card-title {
+  font-weight: bold;
 }
 h3 {
   margin: 40px 0 0;

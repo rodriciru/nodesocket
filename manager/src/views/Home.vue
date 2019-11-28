@@ -20,8 +20,15 @@
      La base de datos se borrara y se creara con las imágenes existentes ahora ahí,<br/>
      por lo que perderás todos los cambios irreversiblemente.</p>
  </b-modal>
+ <b-modal id="info" title="Información" ok-only>
+   <p>Aqui puedes ver las imagenes que estan grabadas y gestionarlas.<br/>
+     Las gestiones que puedes hacer son eliminarlas, reordenarlas arrastrandolas donde desees,
+     ocultarlas y eliminar todas las imagenes
+     y recargarla desde el directorio (cuidado con esta opcion)</p>
+ </b-modal>
     <portal to="destination">
       <b-button-group>
+        <b-button variant="info" v-b-modal.info>Info</b-button>
         <b-button variant="success" v-on:click="recargar">Recargar</b-button>
         <b-button variant="danger" v-b-modal.obtenerDeDir>Remplazar desde directorio</b-button>
       </b-button-group>

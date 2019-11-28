@@ -8,12 +8,16 @@
 </template>
 
 <style lang="scss">
+body{
+  background-color: #424242;
+  color: #fff;
+}
 #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
+    color: #ececec;
 }
 
 #nav {
@@ -27,5 +31,8 @@
             color: #42b983;
         }
     }
+}
+.container-fluid{
+  padding-top: 1rem;
 }
 </style>
