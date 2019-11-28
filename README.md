@@ -13,7 +13,11 @@ Eso no es una solución y lo que cree es una pagina web que se actualiza inmedia
 
 ## Como funciona:
 Se crea los Vhost apuntado a cada carpeta y la base de datos.  
-Hay que inicializar luego los servidores Node.js. Para ello ir a cada carpeta y ejecutar este comando:
+Hay que inicializar luego los servidores Node.js. Para ello ejecuta este comando
+```sh
+npm run start  
+```
+O si lo prefieres navega a cada carpeta y ejecuta este comando:
 ```sh
 npm run start  
 ```
