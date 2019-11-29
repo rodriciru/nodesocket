@@ -7,7 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "controller": "(cd controller && npm run start)",
     "socket": "(cd socket && npm run start)",
-	"start": "run-p controller socket"
+    "start": "run-p controller socket",
+    "initController": "cd controller && npm install",
+    "initManager": "cd manager && npm install",
+    "initSocket": "cd socket && npm install",
+    "init": "run-p initController initManager initSocket"
   },
   "repository": {
     "type": "git",

@@ -26,6 +26,8 @@ var dsn = {
 };
 */
 
+
+//wamp64 -> bin -> mariadb( o mysql depende) -> carpeta de la version -> my.ini
 /*
 log-bin=mysql-bin
 
