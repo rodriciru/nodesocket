@@ -7,7 +7,7 @@
   >
     <b-card
    :title="image.url"
-   :img-src="'http://imagenes.nodesocket.local/' + image.url"
+   :img-src="axiosHost + ':8084/' + image.url"
    :img-alt="image.url"
    img-top
    tag="article"
@@ -56,7 +56,7 @@ export default {
     setActivo(e, id) {
       const activo = e ? 1 : 0;
       axios
-        .get(`http://controller.manager.nodesocket.local:3001/setActivo/${id}/${activo}`)
+        .get(`${this.axiosHost}:3001/setActivo/${id}/${activo}`)
         .then(() => {
           this.$parent.recargar();
         })
@@ -87,7 +87,7 @@ export default {
     dragEnd(e) {
       const { id } = e.item.dataset;
       axios
-        .get(`http://controller.manager.nodesocket.local:3001/setPosicion/${id}/${e.newIndex}`)
+        .get(`${this.axiosHost}:3001/setPosicion/${id}/${e.newIndex}`)
         .then(() => {
           this.$parent.recargar();
         })
@@ -141,7 +141,7 @@ export default {
     },
     deleteImage(id, url) {
       axios
-        .get(`http://controller.manager.nodesocket.local:3001/deleteImage/${id}/${url}`)
+        .get(`${this.axiosHost}:3001/deleteImage/${id}/${url}`)
         .then(() => {
           this.$parent.recargar();
         })

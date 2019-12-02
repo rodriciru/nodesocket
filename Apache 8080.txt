@@ -1,0 +1,6 @@
+Añadir a httpd.conf esto:
+
+Listen 0.0.0.0:8080
+Listen [::0]:8080
+Listen 0.0.0.0:8084
+Listen [::0]:8084

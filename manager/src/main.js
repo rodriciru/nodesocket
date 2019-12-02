@@ -10,6 +10,8 @@ import router from './router';
 
 library.add(fas);
 
+Vue.prototype.axiosHost = `http://${window.location.host.split(':')[0]}`;
+
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.config.productionTip = false;

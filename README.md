@@ -6,9 +6,9 @@ Pero nos cacheaba todo el rato, por lo que cada vez que alguien subiese una foto
 Eso no es una solución y lo que cree es una pagina web que se actualiza inmediatamente y no cachea gracias al uso de websockets con Socket.io.
 ## Hay varias partes:
 1. Socket -> es la pagina web que hay que poner en la fuente de OBS Studio. Consiste en un servidor (Node.js  + Express) que emite en esta url: http://nodesocket.local:3000/
-2. Manager -> es la gestión de la APP. Es una pagina web hecha en VUE.js desde la que se puede gestionar las imágenes, el orden, la visibilidad, añadir nuevas y modificar opciones. Se encuentra en esta URL: http://localhost:8080/ en modo dev y luego en modo prod, se encuentra en http://manager.nodesocket.local
+2. Manager -> es la gestión de la APP. Es una pagina web hecha en VUE.js desde la que se puede gestionar las imágenes, el orden, la visibilidad, añadir nuevas y modificar opciones. Se encuentra en esta URL: http://localhost:8080/ en modo dev y luego en modo prod, se encuentra en http://manager.nodesocket.local en local o atraves de LAN si se abren para que el apache escuche en 8080 esta aqui: ipaddr:8080
 3. Controller -> Otro servidor Node.js + Express, que nos da las funciones de control sobre las operaciones de la imágenes y las opciones. http://controller.manager.nodesocket.local:3001
-4. Imágenes -> simplemente donde se encuentran las imágenes almacenadas. Esta ruta apunta ahí: http://imagenes.nodesocket.local
+4. Imágenes -> simplemente donde se encuentran las imágenes almacenadas. Esta ruta apunta ahí: http://imagenes.nodesocket.local tambien esta habilitado este puerto: 8084
 5. WAMP Server. es donde esta definido los Vhost y donde almacenamos la base de datos MySQL
 
 ## Como funciona:

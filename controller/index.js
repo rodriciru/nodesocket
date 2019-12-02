@@ -188,8 +188,11 @@ app.post('/addImagen', async function(req, res) {
   });
 });
 
-http.listen(port, url, function() {
+/*http.listen(port, url, function() {
   console.log('manager Controller listening on ' + url + ':' + port);
+});*/
+http.listen(port, function() {
+  console.log('manager Controller listening on *:' + port);
 });
 
 updateImagesDbFromDir = function() {

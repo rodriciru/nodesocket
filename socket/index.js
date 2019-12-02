@@ -112,8 +112,11 @@ io.on('connection', function(socket) {
   });
 });
 
-http.listen(port, url, function() {
+/*http.listen(port, url, function() {
   console.log('listening on ' + url + ':' + port);
+});*/
+http.listen(port, function() {
+  console.log('listening on *:' + port);
 });
 
 /*function getAllImages(callback){

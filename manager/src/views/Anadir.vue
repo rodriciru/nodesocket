@@ -37,7 +37,7 @@ export default {
       },
       ok: true,
       dropzoneOptions: {
-        url: 'http://controller.manager.nodesocket.local:3001/addImagen',
+        url: `${this.axiosHost}:3001/addImagen`,
         thumbnailWidth: 150,
         maxFilesize: this.maxFileSize,
         headers: { 'My-Awesome-Header': 'header value' },
@@ -71,7 +71,7 @@ export default {
   methods: {
     getOpcion(nombre) {
       axios
-        .get(`http://controller.manager.nodesocket.local:3001/getOpcion/${nombre}`)
+        .get(`${this.axiosHost}:3001/getOpcion/${nombre}`)
         .then((response) => {
           this.maxFileSize = response.data.msg[0].valor;
         })

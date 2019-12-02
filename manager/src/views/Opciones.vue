@@ -47,7 +47,7 @@ export default {
     recargar() {
       this.showSpinner = true;
       axios
-        .get('http://controller.manager.nodesocket.local:3001/getAllOpciones')
+        .get(`${this.axiosHost}:3001/getAllOpciones`)
         .then((response) => {
           this.showSpinner = false;
           this.items = response.data.msg;
@@ -79,7 +79,7 @@ export default {
     },
     setOpcion(id, valor) {
       axios
-        .get(`http://controller.manager.nodesocket.local:3001/setOpcion/${id}/${valor}`)
+        .get(`${this.axiosHost}:3001/setOpcion/${id}/${valor}`)
         .then(() => {
         })
         .catch((error) => {

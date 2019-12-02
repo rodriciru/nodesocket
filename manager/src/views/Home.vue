@@ -69,7 +69,7 @@ export default {
       this.showSpinner = true;
       this.showErrorAlert = false;
       axios
-        .get('http://controller.manager.nodesocket.local:3001/getAllImages')
+        .get(`${this.axiosHost}:3001/getAllImages`)
         .then((response) => {
           this.showSpinner = false;
           this.images = response.data.msg;
@@ -102,7 +102,7 @@ export default {
     },
     obtenerDeDir() {
       axios
-        .get('http://controller.manager.nodesocket.local:3001/updateImagesDbFromDir')
+        .get(`${this.axiosHost}:3001/updateImagesDbFromDir`)
         .then((response) => {
           if (response.data.ok === 1) {
             this.recargar();
